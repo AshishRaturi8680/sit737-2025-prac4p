@@ -1,0 +1,6 @@
+{
+    "level":"error",
+    "message":"Invalid input: n1 or n2 is not a number",
+    "service":"calc-service"
+}
+
