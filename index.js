@@ -1,19 +1,20 @@
 const express = require("express"); // express is used to create a server for this web app
-const app = express(); // Initialize the express
 const winston = require("winston"); // Import winston which is used for logging requests and any error
+const app = express(); // Initialize the express
+const port = 3000; port //app will listen to specified port number
 
-//setting up winston logger.
+// Winston logger setup
 const logger = winston.createLogger({
   level: "info",
   format: winston.format.json(),
-  defaultMeta: { service: "calc-service" }, //add meta data to the log json indicating it belongs to calc-service
+  defaultMeta: { service: "calculator-microservice" }, //add meta data to the log json indicating it belongs to calculator-microservice
   transports: [
-    new winston.transports.File({ filename: "error.log", level: "error" }), //Log all the errors in error.log file
-    new winston.transports.File({ filename: "combined.log" }), //log all messages (info, warn, error) on combined.log file
+    new winston.transports.File({ filename: "logs/error.log", level: "error" }), //Log all the errors in error.log file
+    new winston.transports.File({ filename: "logs/combined.log" }), //log all messages (info, warn, error) on combined.log file
   ],
 });
 
-if (process.env.NODE_ENV !== "production") { 
+if (process.env.NODE_ENV !== "production") {
   logger.add(
     new winston.transports.Console({
       format: winston.format.simple(),
@@ -21,42 +22,45 @@ if (process.env.NODE_ENV !== "production") {
   );
 }
 
-
-// Create operations object which contains all the aritmetic operation 
+// Supported operations
 const operations = {
   add: (n1, n2) => n1 + n2,
   subtract: (n1, n2) => n1 - n2,
   multiply: (n1, n2) => n1 * n2,
-  divide: (n1, n2) => (n2 !== 0 ? n1 / n2 : "Cannot divide by zero"), // adding check for divide by zero call
+  divide: (n1, n2) => {
+    if (n2 === 0) throw new Error("Cannot divide by zero");
+    return n1 / n2;
+  },
 };
 
-// Set up a route handler that listens for GET requests with a dynamic URL parameter  like /add?n1=10&n2=20 )
+// API endpoint
 app.get("/:operation", (req, res) => {
+  const { operation } = req.params; // extract the operation value from url . ex will extract add from value /add?n1=10&n2=20
+  const num1 = parseFloat(req.query.n1);  // convert the inputted no to floating point numbers
+  const num2 = parseFloat(req.query.n2);
+
+  logger.info(`Request from ${req.ip} - Operation: ${operation}, n1=${req.query.n1}, n2=${req.query.n2}`);
+
+  if (!operations[operation]) {
+    logger.error(`Invalid operation: ${operation}`);
+    return res.status(400).json({ error: "Invalid operation" });
+  }
+
+  if (isNaN(num1) || isNaN(num2)) { // is NaN check for inputted number throw error if not a valid number value
+    logger.error(`Invalid input numbers: n1=${req.query.n1}, n2=${req.query.n2}`);
+    return res.status(400).json({ error: "Invalid numbers provided" });
+  }
+  // added error handling , throw respective rror during calc process
   try {
-    const { operation } = req.params; // extract the operation value from url . ex will extract add from value /add?n1=10&n2=20
-    const n1 = parseFloat(req.query.n1); // convert the inputted no to floating point numbers
-    const n2 = parseFloat(req.query.n2); 
-
-    if (isNaN(n1) || isNaN(n2)) { // is NaN check for inputted number throw error if not a valid number value
-      logger.error("Invalid input: n1 or n2 is not a number");
-      throw new Error("Invalid input: n1 or n2 is not a number");
-    }
-
-    if (!operations[operation]) { //throw error if operaion is not as the one's specified in the operation object
-      logger.error("Invalid operation requested");
-      throw new Error("Use supported operation: add, subtract, multiply, divide");
-    }
-
-    logger.info(`Operation ${operation} requested with parameters ${n1} and ${n2}`);
-    const result = operations[operation](n1, n2);
-    res.status(200).json({ statuscode: 200, operation, result });  // 200 indicates success return the result value
+    const result = operations[operation](num1, num2);
+    res.json({ operation, n1: num1, n2: num2, result });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ statuscode: 500, msg: error.toString() }); // 500 indicates server error.Log the msg in error.log file
+    logger.error(error.message);
+    res.status(500).json({ error: error.message });
   }
 });
 
-const port = 3040; //app will listen to specified port number
 app.listen(port, () => {
-  console.log("Server is listening on port " + port);
+  logger.info(`Calculator microservice listening on port ${port}`);
+  console.log(`Server running at http://localhost:${port}`);
 });

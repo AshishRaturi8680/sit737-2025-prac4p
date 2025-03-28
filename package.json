@@ -1,0 +1,14 @@
+{
+    "name": "sit737-2025-prac4p",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+      "start": "node index.js"
+    },
+    "author": "Ashish",
+    "dependencies": {
+      "express": "^4.18.2",
+      "winston": "^3.9.0"
+    }
+}
