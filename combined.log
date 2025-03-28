@@ -1,5 +1,0 @@
-{"level":"info","message":"Operation subtract requested with parameters 10 and 20","service":"calc-service"}
-{"level":"info","message":"Operation add requested with parameters 10 and 20","service":"calc-service"}
-{"level":"info","message":"Operation multiply requested with parameters 10 and 20","service":"calc-service"}
-{"level":"info","message":"Operation divide requested with parameters 10 and 20","service":"calc-service"}
-{"level":"info","message":"Operation divide requested with parameters 10 and 20","service":"calc-service"}
