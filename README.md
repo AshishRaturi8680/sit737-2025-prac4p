@@ -17,8 +17,9 @@ clone git repository
 do npm install 
 npm start || node index.js
 
-## test the API endpoints
-/add?a=5&b=2   Adds two numbers
-/sub?a=5&b=2   Subtracts b from a
-/mul?a=5&b=2   Multiplies a and b
-/div?a=5&b=2   Divide a by b
+
+## Test the API Endpoints
+- `/add?a=5&b=2` → Adds two numbers  
+- `/sub?a=5&b=2` → Subtracts b from a  
+- `/mul?a=5&b=2` → Multiplies a and b  
+- `/div?a=5&b=2` → Divides a by b  
